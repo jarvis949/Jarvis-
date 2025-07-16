@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JARVIS AI Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #0f0f0f; color: #00ffcc; }
+        button { padding: 10px 20px; margin: 10px; background: #222; color: #00ffcc; border: 1px solid #00ffcc; border-radius: 5px; }
+        input { padding: 10px; width: 80%; border: none; margin-bottom: 10px; }
+        #response { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Hello, I am JARVIS</h1>
+    <input type="text" id="userInput" placeholder="Type something..." />
+    <br>
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="startVoice()">🎤 Speak</button>
+    <div id="response"></div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById("userInput").value;
+            document.getElementById("response").innerHTML = "Thinking...";
+            const res = await fetch("https://api.aichatos.cloud/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{ role: "user", content: input }]
+                })
+            });
+            const data = await res.json();
+            const reply = data.choices?.[0]?.message?.content || "Something went wrong.";
+            document.getElementById("response").innerHTML = reply;
+            speak(reply);
+        }
+
+        function startVoice() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "bn-BD";
+            recognition.start();
+            recognition.onresult = (event) => {
+                document.getElementById("userInput").value = event.results[0][0].transcript;
+                sendMessage();
+            };
+        }
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "bn-BD";
+            speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>
