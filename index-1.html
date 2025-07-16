@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JARVIS - Smart AI Bot</title>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 50px;">
+  <h1>🤖 Hello! I'm JARVIS</h1>
+  <p>Ask me anything! I respond with voice.</p>
+  <input id="userInput" type="text" placeholder="Type or speak something..." style="width: 80%; padding: 10px;" />
+  <button onclick="sendMessage()">Send</button>
+  <p id="response" style="margin-top: 20px;"></p>
+  <script>
+    const userInput = document.getElementById("userInput");
+    const response = document.getElementById("response");
+
+    async function sendMessage() {
+      const text = userInput.value;
+      response.textContent = "Thinking...";
+      try {
+        const res = await fetch("https://api.aichatos.cloud/api/gpt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: text,
+            system: "You are a helpful AI assistant named JARVIS.",
+            withoutContext: true
+          })
+        });
+        const data = await res.json();
+        const reply = data.text || "Sorry, I couldn’t understand.";
+        response.textContent = reply;
+
+        const synth = window.speechSynthesis;
+        const utterThis = new SpeechSynthesisUtterance(reply);
+        synth.speak(utterThis);
+      } catch (e) {
+        response.textContent = "Failed to fetch response.";
+      }
+    }
+  </script>
+</body>
+</html>
